@@ -8,7 +8,7 @@ const asyncHandler=(requestHandler)=>{
 
 export {asyncHandler}
 
-// const asyncHandler=(requestHandler)=> async ()=>{
+// const asyncHandler=(requestHandler)=> async (req,res,next)=>{
 //     try {
 //         await requestHandler(req,res,next)
 //     }
