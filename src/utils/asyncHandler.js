@@ -1,12 +1,11 @@
 // Wrapper function for async handling
-const asyncHandler=(requestHandler)=>{
-    return (req, res, next) => {
-        Promise.resolve(requestHandler(req,res,next)).
-        catch((err)=>next(err))
-    }
-}
+const asyncHandler = (requestHandler) => {
+  return (req, res, next) => {
+    Promise.resolve(requestHandler(req, res, next)).catch((err) => next(err));
+  };
+};
 
-export {asyncHandler}
+export { asyncHandler };
 
 // const asyncHandler=(requestHandler)=> async (req,res,next)=>{
 //     try {
