@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose"; // we are import import Schema also from mongoose
+import mongoose, { Schema } from "mongoose"; // we are importing Schema also from mongoose
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -64,7 +64,7 @@ userSchema.methods.isPasswordCorrect = async function (password) {
 
 userSchema.methods.generateAccessToken = function () {
   //this process don't take that much time we're not making it async
-  jwt.sign(
+  return jwt.sign(
     {
       _id: this._id,
       email: this.email,
@@ -79,7 +79,7 @@ userSchema.methods.generateAccessToken = function () {
 };
 userSchema.methods.generateRefreshToken = function () {
   //this process don't take that much time we're not making it async
-  jwt.sign(
+  return jwt.sign(
     {
       _id: this._id,
     },
