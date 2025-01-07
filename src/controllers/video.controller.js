@@ -7,18 +7,29 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary, deleteMedia } from "../utils/cloudinary.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
   //TODO: get all videos based on query, sort, pagination
+  const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
+
+  const allowedSortFields = ["title", "createdAt", "views", "duration"];
+  if (!allowedSortFields.includes(sortBy)) {
+    throw new ApiError(400, "Invalid sorting field");
+  }
+
   const pageNumber = parseInt(page, 10);
   const limitNumber = parseInt(limit, 10);
 
   if (!pageNumber || pageNumber <= 0) {
-    throw new ApiError(400, "Invalid page");
+    throw new ApiError(400, "Invalid page number");
   }
 
   if (!limitNumber || limitNumber <= 0) {
     throw new ApiError(400, "Invalid limit");
   }
+
+  if (!sortBy) sortBy = "title";
+
+  let sortingOrder = 1;
+  if (sortType === "desc") sortingOrder = -1;
 
   const videos = await Video.aggregate([
     {
@@ -26,7 +37,30 @@ const getAllVideos = asyncHandler(async (req, res) => {
         owner: new mongoose.Types.ObjectId(userId),
       },
     },
+    {
+      $match: {
+        $or: [
+          { title: { $regex: query, $options: "i" } },
+          { description: { $regex: query, $options: "i" } },
+        ],
+      },
+    },
+    {
+      $sort: {
+        [sortBy]: sortingOrder,
+      },
+    },
+    {
+      $skip: (pageNumber - 1) * limitNumber,
+    },
+    {
+      $limit: limitNumber,
+    },
   ]);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, videos, "Videos fetched successfully"));
 });
 
 const publishAVideo = asyncHandler(async (req, res) => {
