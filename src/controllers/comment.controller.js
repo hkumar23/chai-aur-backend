@@ -31,8 +31,11 @@ const getVideoComments = asyncHandler(async (req, res) => {
 
 const addComment = asyncHandler(async (req, res) => {
   // TODO: add a comment to a video
-  const { content, videoId, userId } = req.body;
-  if ([content, videoId, userId].some((field) => field?.trim() === "")) {
+  const userId = req.user._id;
+  const { content, videoId } = req.body;
+  if (
+    [content, videoId].some((field) => field == null || field?.trim() === "")
+  ) {
     throw new ApiError(400, "All fields are required");
   }
 
@@ -49,15 +52,22 @@ const addComment = asyncHandler(async (req, res) => {
 
 const updateComment = asyncHandler(async (req, res) => {
   const { content, commentId } = req.body;
+  const user = req.user;
   if (!content || !commentId) {
     throw new ApiError(400, "All fields are required");
   }
 
-  const comment = await Comment.findByIdAndUpdate(commentId, {
-    $set: {
-      content,
-    },
-  });
+  const comment = await Comment.findByIdAndUpdate(commentId);
+
+  if (user._id.toString() !== comment.owner.toString()) {
+    throw new ApiError(
+      400,
+      "You can only update comments that you have created"
+    );
+  }
+
+  comment.content = content;
+  comment.save();
 
   return res
     .status(200)
@@ -67,8 +77,18 @@ const updateComment = asyncHandler(async (req, res) => {
 const deleteComment = asyncHandler(async (req, res) => {
   // TODO: delete a comment
   const { commentId } = req.body;
+  const user = req.user;
   if (!commentId) {
     throw new ApiError(400, "Comment Id is required");
+  }
+
+  const comment = await Comment.findById(commentId);
+
+  if (user._id.toString() !== comment.owner.toString()) {
+    throw new ApiError(
+      400,
+      "You can only delete comments that you have created"
+    );
   }
 
   await Comment.deleteOne({ _id: commentId });
@@ -78,4 +98,4 @@ const deleteComment = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, [], "Comment deleted successfully"));
 });
 
-export { getVideoComments, addComment };
+export { getVideoComments, addComment, updateComment, deleteComment };
