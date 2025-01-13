@@ -21,11 +21,13 @@ app.use(cookieParser()); // Parses cookies attached to the client’s request
 import userRouter from "../src/routes/user.routes.js";
 import commentRouter from "../src/routes/comment.routes.js";
 import videoRouter from "../src/routes/video.routes.js";
+import likeRouter from "../src/routes/like.routes.js";
 
 // routes declaration
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/comments", commentRouter);
 app.use("/api/v1/videos", videoRouter);
+app.use("/api/v1/likes", likeRouter);
 
 // https://localhost:8000/api/v1/users/register
 export { app };
