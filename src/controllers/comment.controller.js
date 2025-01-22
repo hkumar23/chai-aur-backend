@@ -57,7 +57,7 @@ const updateComment = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields are required");
   }
 
-  const comment = await Comment.findByIdAndUpdate(commentId);
+  const comment = await Comment.findById(commentId);
 
   if (user._id.toString() !== comment.owner.toString()) {
     throw new ApiError(
